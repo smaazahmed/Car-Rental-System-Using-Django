@@ -1,0 +1,307 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Rent A Car | Premium Fleet Rentals - DriveLux{% endblock %}
+
+{% block content %}
+<!-- 1. Hero Landing Section -->
+<div class="hero-wrapper" style="background-image: url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=1600&auto=format&fit=crop&q=80');">
+    <div class="container hero-content py-5 text-center text-lg-start">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <span class="badge bg-primary px-3 py-2 rounded-pill mb-3 fs-7 tracking-wider uppercase font-weight-600">Premium Fleet Experience</span>
+                <h1 class="display-3 text-white font-weight-800 mb-3 tracking-tight">
+                    Ride in Luxury,<br>Arrive in Absolute Style
+                </h1>
+                <p class="lead text-white-50 mb-4 fs-5 font-weight-400">
+                    Skip the counter. Instantly unlock hundreds of sports coupes, luxury SUVs, and long-range electric cars across major cities with our keyless mobile reservation.
+                </p>
+                <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start">
+                    <a href="{% url 'car_list' %}" class="btn-premium btn-lg text-decoration-none">Explore Fleet <i class="fas fa-arrow-right ms-2"></i></a>
+                    <a href="#about-section" class="btn-premium-outline btn-lg text-white text-decoration-none border-white hover-bg-white">Learn More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Hero Search Bar Overlay -->
+<div class="container hero-search-overlay">
+    <div class="glass-panel p-4 p-md-5">
+        <form action="{% url 'car_list' %}" method="GET" class="row g-3">
+            <div class="col-lg-4 col-md-12">
+                <label class="form-label text-secondary font-weight-600"><i class="fas fa-search text-primary me-2"></i>What are you looking for?</label>
+                <div class="position-relative">
+                    <input type="text" name="q" id="search-input" class="form-control shadow-none bg-white text-dark" placeholder="Tesla, Range Rover, Mustang..." autocomplete="off">
+                    <!-- Suggestions Box -->
+                    <div id="search-suggestions" class="suggestions-list-box" style="display: none;"></div>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label text-secondary font-weight-600"><i class="fas fa-car text-primary me-2"></i>Select Brand</label>
+                <select name="brand" class="form-select bg-white text-dark shadow-none">
+                    <option value="">All Brands</option>
+                    {% for brand in brands %}
+                        <option value="{{ brand }}">{{ brand }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label text-secondary font-weight-600"><i class="fas fa-cogs text-primary me-2"></i>Transmission</label>
+                <select name="transmission" class="form-select bg-white text-dark shadow-none">
+                    <option value="">Any Transmission</option>
+                    <option value="Automatic">Automatic</option>
+                    <option value="Manual">Manual</option>
+                </select>
+            </div>
+            
+            <div class="col-lg-2 col-md-12 d-flex align-items-end">
+                <button type="submit" class="btn btn-premium w-100 py-3 d-flex align-items-center justify-content-center gap-2">
+                    <i class="fas fa-search"></i> Search Cars
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 3. Popular Brands Section -->
+<div class="container py-5 mt-5">
+    <div class="text-center mb-5">
+        <h2 class="fs-1">Popular Fleet Brands</h2>
+        <p class="text-secondary">Direct bookings from world-renowned luxury and electric manufacturers</p>
+    </div>
+    <div class="row g-4 justify-content-center text-center">
+        {% for b in brands|slice:":6" %}
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="{% url 'car_list' %}?brand={{ b }}" class="text-decoration-none text-dark">
+                    <div class="glass-panel p-4 d-flex flex-column align-items-center gap-2 hover-bg-primary">
+                        <i class="fas fa-shield-alt text-primary fs-3"></i>
+                        <span class="font-weight-600 fs-6 text-primary">{{ b }}</span>
+                    </div>
+                </a>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="glass-panel p-4 text-center text-secondary">
+                    Popular brands will be dynamically populated once cars are created!
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- 4. Featured Cars Grid -->
+<div class="container py-5">
+    <div class="d-flex flex-wrap align-items-end justify-content-between mb-5 g-3">
+        <div>
+            <h2 class="fs-1">Our Featured Fleet</h2>
+            <p class="text-secondary mb-0">Carefully curated vehicles kept in immaculate, showroom conditions</p>
+        </div>
+        <a href="{% url 'car_list' %}" class="btn btn-premium-outline">View Entire Fleet <i class="fas fa-arrow-right ms-2"></i></a>
+    </div>
+    
+    <div class="row g-4">
+        {% for car in featured_cars %}
+            <div class="col-lg-4 col-md-6">
+                <div class="premium-card position-relative">
+                    
+                    <!-- Favorite Icon Switcher overlay -->
+                    {% if request.user.is_authenticated %}
+                        <button class="fav-btn-overlay fav-btn-toggle {% if car in request.user.profile.favorites.all %}active{% endif %}" data-car-id="{{ car.id }}" title="Save to favorites">
+                            <i class="{% if car in request.user.profile.favorites.all %}fas{% else %}far{% endif %} fa-heart"></i>
+                        </button>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="fav-btn-overlay text-decoration-none" title="Log in to save favorites">
+                            <i class="far fa-heart"></i>
+                        </a>
+                    {% endif %}
+
+                    <!-- Car primary Image -->
+                    <div style="aspect-ratio: 16/10; overflow: hidden; background-color: #f1f5f9; position: relative;">
+                        {% if car.images.exists %}
+                            <img src="{{ car.images.first.image.url }}" alt="{{ car.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% else %}
+                            <!-- Fallback generated Unsplash image -->
+                            <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600&auto=format&fit=crop&q=80" alt="{{ car.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        {% endif %}
+                        <span class="badge bg-primary position-absolute bottom-0 start-0 m-3 fs-7 px-3 py-2 shadow-sm font-weight-600">${{ car.rent_price_per_day }} / Day</span>
+                    </div>
+
+                    <!-- Car Meta Specifications -->
+                    <div class="p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-secondary fs-7 font-weight-600 uppercase">{{ car.brand }}</span>
+                            <div class="d-flex align-items-center gap-1 text-warning fs-7 font-weight-600">
+                                <i class="fas fa-star"></i> {{ car.average_rating }}
+                            </div>
+                        </div>
+                        <h4 class="mb-3 text-primary">{{ car.name }}</h4>
+                        
+                        <!-- Quick specs grid -->
+                        <div class="row g-2 mb-4 border-top border-bottom py-3 border-color">
+                            <div class="col-6 d-flex align-items-center gap-2 fs-7 text-secondary">
+                                <i class="fas fa-cogs text-primary"></i> {{ car.transmission_type }}
+                            </div>
+                            <div class="col-6 d-flex align-items-center gap-2 fs-7 text-secondary">
+                                <i class="fas fa-gas-pump text-primary"></i> {{ car.fuel_type }}
+                            </div>
+                            <div class="col-6 d-flex align-items-center gap-2 fs-7 text-secondary">
+                                <i class="fas fa-users text-primary"></i> {{ car.seating_capacity }} Seater
+                            </div>
+                            <div class="col-6 d-flex align-items-center gap-2 fs-7 text-secondary">
+                                <i class="fas fa-map-marker-alt text-primary"></i> {{ car.location }}
+                            </div>
+                        </div>
+
+                        <!-- Direct book action -->
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'car_detail' car.id %}" class="btn btn-premium-outline flex-grow-1">View Details</a>
+                            <a href="{% url 'init_booking' car.id %}" class="btn btn-premium flex-grow-1 d-flex align-items-center justify-content-center gap-2">
+                                <i class="fas fa-key"></i> Rent Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="glass-panel p-5 text-center text-secondary">
+                    <i class="fas fa-car-crash fs-2 text-primary mb-3"></i>
+                    <h4>No Cars Available Right Now</h4>
+                    <p>We are currently onboarding custom sports and luxury fleet vehicles. Please check back later or contact admin!</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- 5. Interactive About Section -->
+<div class="py-5" id="about-section" style="background-color: var(--bg-secondary); border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+    <div class="container py-4">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-6">
+                <img src="https://images.unsplash.com/photo-1580273916550-e323be2ae537?w=800&auto=format&fit=crop&q=80" alt="About Antigravity Cars" class="img-fluid rounded-4 shadow-lg border border-color">
+            </div>
+            <div class="col-lg-6">
+                <span class="text-primary font-weight-600 fs-7 tracking-wider uppercase">Uncompromising Standards</span>
+                <h2 class="display-5 text-primary mb-4">Redefining Automobile Rentals Since 2026</h2>
+                <p class="text-secondary mb-4">
+                    Founded in 2026, DriveLux has established itself as the leading provider of premium car rentals. We serve corporate clients, business executives, international travelers, and motor enthusiasts who appreciate performance and impeccable service.
+                </p>
+                <div class="row g-4 text-center text-sm-start">
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <div class="stat-icon-wrapper bg-primary-glow text-primary"><i class="fas fa-shield-alt"></i></div>
+                            <h5 class="mb-0 text-primary">Fully Insured Fleet</h5>
+                        </div>
+                        <p class="text-secondary fs-7 mb-0">Every vehicle comes equipped with comprehensive LDW coverage & roadside assistance.</p>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <div class="stat-icon-wrapper bg-primary-glow text-primary"><i class="fas fa-headset"></i></div>
+                            <h5 class="mb-0 text-primary">24/7 Client Care</h5>
+                        </div>
+                        <p class="text-secondary fs-7 mb-0">Real human operators available around the clock to support booking custom requests.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 6. Customer Testimonials Section -->
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="fs-1">What Our Clients Say</h2>
+        <p class="text-secondary">Read actual reviews from business leaders, road-trippers, and tech executives</p>
+    </div>
+    <div class="row g-4">
+        {% for t in testimonials %}
+            <div class="col-lg-4 col-md-6">
+                <div class="glass-panel p-4 d-flex flex-column h-100 justify-content-between">
+                    <div>
+                        <div class="d-flex align-items-center gap-1 text-warning mb-3">
+                            {% for i in "12345" %}
+                                <i class="fas fa-star fs-7"></i>
+                            {% endfor %}
+                        </div>
+                        <p class="text-secondary italic mb-4 fs-7">
+                            "{{ t.comment }}"
+                        </p>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-3 pt-3 border-top border-color">
+                        <img src="{{ t.avatar }}" alt="{{ t.name }}" class="rounded-circle" style="width: 48px; height: 48px; object-fit: cover;">
+                        <div>
+                            <h6 class="mb-0 text-primary">{{ t.name }}</h6>
+                            <small class="text-secondary text-xs">{{ t.role }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- 7. Contact Section -->
+<div class="container py-5">
+    <div class="glass-panel p-4 p-md-5">
+        <div class="row g-5">
+            <div class="col-lg-5">
+                <h2 class="display-6 text-primary mb-3">Get in Touch</h2>
+                <p class="text-secondary mb-4">Have questions about corporate rates, long-term leasing, or cross-border rentals? Fill out the form, and a specialist will contact you within 2 hours.</p>
+                <ul class="list-unstyled d-flex flex-column gap-3 mb-0">
+                    <li class="d-flex align-items-center gap-3">
+                        <div class="stat-icon-wrapper bg-primary-glow text-primary"><i class="fas fa-map-marker-alt"></i></div>
+                        <div>
+                            <h6 class="mb-0 text-primary">Headquarters</h6>
+                            <span class="text-secondary fs-7">700 Fifth Avenue, Suite 40, New York, NY</span>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-center gap-3">
+                        <div class="stat-icon-wrapper bg-primary-glow text-primary"><i class="fas fa-phone-alt"></i></div>
+                        <div>
+                            <h6 class="mb-0 text-primary">Phone Support</h6>
+                            <span class="text-secondary fs-7">+1 (800) 555-CAR-RENT (227-7368)</span>
+                        </div>
+                    </li>
+                    <li class="d-flex align-items-center gap-3">
+                        <div class="stat-icon-wrapper bg-primary-glow text-primary"><i class="fas fa-envelope"></i></div>
+                        <div>
+                            <h6 class="mb-0 text-primary">Email Enquiries</h6>
+                            <span class="text-secondary fs-7">support@driveluxrentals.com</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="col-lg-7">
+                <form action="{% url 'contact' %}" method="POST" class="row g-3">
+                    {% csrf_token %}
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary font-weight-600">First Name</label>
+                        <input type="text" name="name" class="form-control bg-white text-dark shadow-none border-color" placeholder="e.g. John" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary font-weight-600">Email Address</label>
+                        <input type="email" name="email" class="form-control bg-white text-dark shadow-none border-color" placeholder="e.g. john@company.com" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label text-secondary font-weight-600">Subject</label>
+                        <input type="text" name="subject" class="form-control bg-white text-dark shadow-none border-color" placeholder="e.g. Corporate Account Rates Request" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label text-secondary font-weight-600">Message Description</label>
+                        <textarea name="message" class="form-control bg-white text-dark shadow-none border-color" rows="4" placeholder="Detail your specific requests..." required></textarea>
+                    </div>
+                    <div class="col-12 mt-4 text-end">
+                        <button type="submit" class="btn btn-premium px-5 py-3"><i class="fas fa-paper-plane me-2"></i> Send Message</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

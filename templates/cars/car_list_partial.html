@@ -1,0 +1,76 @@
+{% for car in cars %}
+    <div class="col-md-6 col-lg-4 animate-fade-in">
+        <div class="premium-card position-relative">
+            <!-- Favorite button overlay -->
+            {% if request.user.is_authenticated %}
+                <button class="fav-btn-overlay fav-btn-toggle {% if car in request.user.profile.favorites.all %}active{% endif %}" data-car-id="{{ car.id }}" title="Toggle Wishlist">
+                    <i class="{% if car in request.user.profile.favorites.all %}fas{% else %}far{% endif %} fa-heart"></i>
+                </button>
+            {% else %}
+                <a href="{% url 'login' %}" class="fav-btn-overlay text-decoration-none" title="Log in to save favorites">
+                    <i class="far fa-heart"></i>
+                </a>
+            {% endif %}
+
+            <!-- Car image cover -->
+            <div style="aspect-ratio: 16/10; overflow: hidden; background-color: #f1f5f9; position: relative;">
+                {% if car.images.exists %}
+                    <img src="{{ car.images.first.image.url }}" alt="{{ car.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                    <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=600" alt="{{ car.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% endif %}
+                <span class="badge bg-primary position-absolute bottom-0 start-0 m-3 fs-7 px-3 py-2 shadow-sm font-weight-600">${{ car.rent_price_per_day }} / Day</span>
+                
+                {% if not car.is_available %}
+                    <span class="badge bg-danger position-absolute top-0 start-0 m-3 fs-8 px-2 py-1 uppercase font-weight-700">Rented</span>
+                {% endif %}
+            </div>
+
+            <!-- Car Specs Meta details -->
+            <div class="p-4">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-secondary fs-7 font-weight-600 uppercase">{{ car.brand }}</span>
+                    <div class="d-flex align-items-center gap-1 text-warning fs-7 font-weight-600">
+                        <i class="fas fa-star text-xs"></i> {{ car.average_rating }}
+                    </div>
+                </div>
+                <h4 class="mb-3 text-primary">{{ car.name }}</h4>
+                
+                <!-- Spec Grid -->
+                <div class="row g-2 mb-4 border-top border-bottom py-3 border-color">
+                    <div class="col-6 d-flex align-items-center gap-2 fs-7 text-secondary">
+                        <i class="fas fa-cogs text-primary"></i> {{ car.transmission_type }}
+                    </div>
+                    <div class="col-6 d-flex align-items-center gap-2 fs-7 text-secondary">
+                        <i class="fas fa-gas-pump text-primary"></i> {{ car.fuel_type }}
+                    </div>
+                    <div class="col-6 d-flex align-items-center gap-2 fs-7 text-secondary">
+                        <i class="fas fa-users text-primary"></i> {{ car.seating_capacity }} Seater
+                    </div>
+                    <div class="col-6 d-flex align-items-center gap-2 fs-7 text-secondary">
+                        <i class="fas fa-map-marker-alt text-primary"></i> {{ car.location }}
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a href="{% url 'car_detail' car.id %}" class="btn btn-premium-outline flex-grow-1 fs-7">Details</a>
+                    {% if car.is_available %}
+                        <a href="{% url 'init_booking' car.id %}" class="btn btn-premium flex-grow-1 fs-7 d-flex align-items-center justify-content-center gap-2">
+                            <i class="fas fa-key"></i> Rent Now
+                        </a>
+                    {% else %}
+                        <button class="btn btn-secondary flex-grow-1 fs-7 border-0" style="background-color: var(--border-color); color: var(--text-secondary);" disabled>Rented Out</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% empty %}
+    <div class="col-12 animate-fade-in">
+        <div class="glass-panel p-5 text-center text-secondary border-dashed border-2">
+            <i class="fas fa-car-crash fs-2 text-primary mb-3"></i>
+            <h4>No Vehicles Match Your Criteria</h4>
+            <p class="mb-0">Try clearing some filtering attributes, raising your budget slider, or searching for other keywords.</p>
+        </div>
+    </div>
+{% endfor %}

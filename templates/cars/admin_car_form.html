@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} | Admin Management{% endblock %}
+{% block content %}
+<div class="container py-5 mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="glass-panel p-4 p-md-5">
+                <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom border-color">
+                    <a href="{% url 'admin_dashboard' %}" class="btn btn-premium-outline py-1 px-3 fs-7" title="Go Back"><i class="fas fa-chevron-left"></i> Back</a>
+                    <h2 class="text-primary mb-0 font-weight-800">{{ title }}</h2>
+                </div>
+
+                <form method="POST" enctype="multipart/form-data" class="row g-3">
+                    {% csrf_token %}
+                    
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary font-weight-600">Car Name *</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-secondary font-weight-600">Brand *</label>
+                        {{ form.brand }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary font-weight-600">Model Year *</label>
+                        {{ form.model_year }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary font-weight-600">Color finish *</label>
+                        {{ form.color }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary font-weight-600">Registration Number *</label>
+                        {{ form.registration_number }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary font-weight-600">Transmission *</label>
+                        {{ form.transmission_type }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary font-weight-600">Fuel Type *</label>
+                        {{ form.fuel_type }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary font-weight-600">Seating Capacity *</label>
+                        {{ form.seating_capacity }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary font-weight-600">Rent Price Per Day ($) *</label>
+                        {{ form.rent_price_per_day }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary font-weight-600">Current Mileage (km) *</label>
+                        {{ form.mileage }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-secondary font-weight-600">Location Area *</label>
+                        {{ form.location }}
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label text-secondary font-weight-600">Upload Fleet Images</label>
+                        <input type="file" name="images" class="form-control bg-white text-dark shadow-none border-color" multiple accept="image/*">
+                        <small class="text-secondary mt-1 d-block">You can select multiple photos simultaneously. The first photo will act as the principal catalog thumbnail.</small>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label text-secondary font-weight-600">Availability Status</label>
+                        <div class="form-check form-switch p-0 ps-5 mt-1">
+                            {{ form.is_available }}
+                            <label class="form-check-label text-secondary fs-7" for="id_is_available">Mark as available for public rentals</label>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label text-secondary font-weight-600">Detailed Description *</label>
+                        {{ form.description }}
+                    </div>
+
+                    <div class="col-12 text-end mt-4 pt-3 border-top border-color">
+                        <a href="{% url 'admin_dashboard' %}" class="btn btn-premium-outline me-2">Cancel</a>
+                        <button type="submit" class="btn btn-premium px-4 py-3"><i class="fas fa-save me-2"></i> Save Vehicle</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+{% block title %}Administrator Control Center | Antigravity Rentals{% endblock %}
+{% block content %}
+<div class="container py-5 mt-4">
+    
+    <!-- Dashboard Header -->
+    <div class="glass-panel p-4 p-md-5 mb-5 d-flex flex-wrap align-items-center justify-content-between g-4 animate-fade-in">
+        <div>
+            <span class="badge bg-danger px-3 py-2 rounded-pill mb-2 uppercase fs-8 font-weight-700">Staff Console</span>
+            <h1 class="text-primary display-6 mb-1 font-weight-800">Admin Control Center</h1>
+            <p class="text-secondary mb-0">Monitor billing accounts, manage fleet inventory, and approve booking requests.</p>
+        </div>
+        <div>
+            <a href="{% url 'admin_add_car' %}" class="btn btn-premium d-flex align-items-center gap-2"><i class="fas fa-plus-circle"></i> Add New Vehicle</a>
+        </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-3 col-sm-6">
+            <div class="dashboard-stat-card">
+                <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary"><i class="fas fa-users"></i></div>
+                <div>
+                    <h6 class="text-secondary mb-1">Total Users</h6>
+                    <h3 class="mb-0 text-primary font-weight-800">{{ total_users }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6">
+            <div class="dashboard-stat-card">
+                <div class="stat-icon-wrapper bg-info bg-opacity-10 text-info"><i class="fas fa-calendar-check"></i></div>
+                <div>
+                    <h6 class="text-secondary mb-1">Total Bookings</h6>
+                    <h3 class="mb-0 text-primary font-weight-800">{{ total_bookings }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6">
+            <div class="dashboard-stat-card">
+                <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success"><i class="fas fa-usd-circle"></i><i class="fas fa-dollar-sign"></i></div>
+                <div>
+                    <h6 class="text-secondary mb-1">Total Revenue</h6>
+                    <h3 class="mb-0 text-primary font-weight-800">${{ total_revenue }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6">
+            <div class="dashboard-stat-card">
+                <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning"><i class="fas fa-car"></i></div>
+                <div>
+                    <h6 class="text-secondary mb-1">Total Fleet</h6>
+                    <h3 class="mb-0 text-primary font-weight-800">{{ total_cars }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Chart & Fleet Stats -->
+    <div class="row g-4 mb-5">
+        <!-- Chart.js Revenue Graph -->
+        <div class="col-lg-8">
+            <div class="glass-panel p-4 h-100">
+                <h4 class="text-primary mb-4 font-weight-700"><i class="fas fa-chart-line text-primary me-2"></i>Monthly Revenue Analytics</h4>
+                <div style="position: relative; height: 300px; width: 100%;">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Rented Cars Sidebar -->
+        <div class="col-lg-4">
+            <div class="glass-panel p-4 h-100">
+                <h4 class="text-primary mb-4 font-weight-700"><i class="fas fa-fire text-warning me-2"></i>Most Popular Fleet</h4>
+                
+                <div class="d-flex flex-column gap-3">
+                    {% for car in most_rented_cars %}
+                        <div class="premium-card p-2 d-flex align-items-center gap-3">
+                            <div style="width: 80px; height: 50px; border-radius: 8px; overflow: hidden; background-color: var(--border-color);">
+                                {% if car.images.exists %}
+                                    <img src="{{ car.images.first.image.url }}" alt="{{ car.name }}" style="width:100%; height:100%; object-fit:cover;">
+                                {% else %}
+                                    <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=150" style="width:100%; height:100%; object-fit:cover;">
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0 text-primary font-weight-700 fs-7">{{ car.brand }} {{ car.name }}</h6>
+                                <small class="text-secondary text-xs">{{ car.booking_count }} Booking{{ car.booking_count|pluralize }} logged</small>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="text-center py-5 text-secondary">
+                            <p class="mb-0 fs-7">Popular vehicle statistics will appear once reservations are placed.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Management Tabs Panels -->
+    <div class="glass-panel p-4">
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-pills mb-4 border-bottom border-color pb-3 gap-2" id="adminTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active font-weight-600 px-4" id="bookings-tab" data-bs-toggle="tab" data-bs-target="#bookings-panel" type="button" role="tab" aria-controls="bookings-panel" aria-selected="true">
+                    <i class="fas fa-calendar-alt me-2"></i> Bookings Manager
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link font-weight-600 px-4" id="cars-tab" data-bs-toggle="tab" data-bs-target="#cars-panel" type="button" role="tab" aria-controls="cars-panel" aria-selected="false">
+                    <i class="fas fa-car me-2"></i> Fleet Manager
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link font-weight-600 px-4" id="users-tab" data-bs-toggle="tab" data-bs-target="#users-panel" type="button" role="tab" aria-controls="users-panel" aria-selected="false">
+                    <i class="fas fa-users-cog me-2"></i> Accounts Manager
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Contents -->
+        <div class="tab-content" id="adminTabContent">
+            
+            <!-- Tab 1: Bookings Panel -->
+            <div class="tab-pane fade show active" id="bookings-panel" role="tabpanel" aria-labelledby="bookings-tab">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle fs-7" style="color: var(--text-primary);">
+                        <thead class="border-bottom border-color">
+                            <tr class="text-secondary font-weight-600 uppercase">
+                                <th>Ref ID</th>
+                                <th>Driver</th>
+                                <th>Car Details</th>
+                                <th>Rental Period</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th class="text-end">Manager Decisions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for b in all_bookings %}
+                                <tr class="border-bottom border-color">
+                                    <td class="font-weight-700 text-primary">#{{ b.id }}</td>
+                                    <td>
+                                        <strong class="text-primary">{{ b.user.first_name }} {{ b.user.last_name }}</strong>
+                                        <small class="text-secondary d-block font-weight-500">@{{ b.user.username }}</small>
+                                    </td>
+                                    <td>
+                                        <strong class="text-primary">{{ b.car.brand }} {{ b.car.name }}</strong>
+                                        <small class="text-secondary d-block font-weight-500">{{ b.car.registration_number }}</small>
+                                    </td>
+                                    <td class="text-secondary">{{ b.pickup_date }} to {{ b.return_date }}</td>
+                                    <td class="font-weight-700 text-primary">${{ b.total_price }}</td>
+                                    <td>
+                                        <span class="badge-custom badge-{{ b.status|lower }}">{{ b.status }}</span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-flex justify-content-end gap-1">
+                                            {% if b.status == 'Pending' %}
+                                                <a href="{% url 'admin_booking_action' b.id 'approve' %}" class="btn btn-success btn-sm text-white px-2" title="Approve booking"><i class="fas fa-check"></i></a>
+                                            {% endif %}
+                                            {% if b.status == 'Approved' %}
+                                                <a href="{% url 'admin_booking_action' b.id 'complete' %}" class="btn btn-info btn-sm text-white px-2" title="Mark completed"><i class="fas fa-check-double"></i></a>
+                                            {% endif %}
+                                            {% if b.status != 'Cancelled' and b.status != 'Completed' %}
+                                                <a href="{% url 'admin_booking_action' b.id 'cancel' %}" class="btn btn-danger btn-sm text-white px-2" title="Cancel booking & Refund"><i class="fas fa-ban"></i></a>
+                                            {% endif %}
+                                            <a href="{% url 'booking_receipt' b.id %}" class="btn btn-premium-outline btn-sm px-2" title="View receipt"><i class="fas fa-receipt"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-5 text-secondary">
+                                        <i class="fas fa-calendar-times fs-2 text-primary mb-2"></i>
+                                        <p class="mb-0">No booking requests logged in the database.</p>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 2: Fleet Panel -->
+            <div class="tab-pane fade" id="cars-panel" role="tabpanel" aria-labelledby="cars-tab">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle fs-7" style="color: var(--text-primary);">
+                        <thead class="border-bottom border-color">
+                            <tr class="text-secondary font-weight-600 uppercase">
+                                <th>ID</th>
+                                <th>Car Brand & Name</th>
+                                <th>Reg Number</th>
+                                <th>Location Area</th>
+                                <th>Price/Day</th>
+                                <th>Status</th>
+                                <th class="text-end">Inventory Controls</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for car in all_cars %}
+                                <tr class="border-bottom border-color">
+                                    <td class="text-secondary font-weight-600">#{{ car.id }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div style="width: 48px; height: 32px; border-radius: 4px; overflow: hidden; background-color: var(--border-color);">
+                                                {% if car.images.exists %}
+                                                    <img src="{{ car.images.first.image.url }}" style="width:100%; height:100%; object-fit:cover;">
+                                                {% else %}
+                                                    <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=100" style="width:100%; height:100%; object-fit:cover;">
+                                                {% endif %}
+                                            </div>
+                                            <strong class="text-primary">{{ car.brand }} {{ car.name }}</strong>
+                                        </div>
+                                    </td>
+                                    <td class="text-secondary font-weight-600">{{ car.registration_number }}</td>
+                                    <td class="text-secondary">{{ car.location }}</td>
+                                    <td class="font-weight-700 text-primary">${{ car.rent_price_per_day }}</td>
+                                    <td>
+                                        {% if car.is_available %}
+                                            <span class="badge bg-success-glow text-success px-2 py-1 fs-8 uppercase font-weight-700">Available</span>
+                                        {% else %}
+                                            <span class="badge bg-danger-glow text-danger px-2 py-1 fs-8 uppercase font-weight-700">Rented Out</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="d-flex justify-content-end gap-1">
+                                            <a href="{% url 'admin_edit_car' car.id %}" class="btn btn-warning btn-sm text-white px-2" title="Edit vehicle details"><i class="fas fa-edit"></i></a>
+                                            <a href="{% url 'admin_delete_car' car.id %}" class="btn btn-danger btn-sm text-white px-2" onclick="return confirm('Delete this vehicle from inventory permanently?')" title="Delete vehicle"><i class="fas fa-trash-alt"></i></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center py-5 text-secondary">
+                                        <i class="fas fa-car-crash fs-2 text-primary mb-2"></i>
+                                        <p class="mb-0">Your rental vehicle inventory is empty. Start adding cars!</p>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tab 3: Users Panel -->
+            <div class="tab-pane fade" id="users-panel" role="tabpanel" aria-labelledby="users-tab">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle fs-7" style="color: var(--text-primary);">
+                        <thead class="border-bottom border-color">
+                            <tr class="text-secondary font-weight-600 uppercase">
+                                <th>User ID</th>
+                                <th>Driver Username</th>
+                                <th>Contact Information</th>
+                                <th>Account Role</th>
+                                <th>Registration Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in all_users %}
+                                <tr class="border-bottom border-color">
+                                    <td class="text-secondary">#{{ u.id }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: var(--border-color);">
+                                                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80" style="width:100%; height:100%; object-fit:cover;">
+                                            </div>
+                                            <div>
+                                                <strong class="text-primary">{{ u.first_name }} {{ u.last_name }}</strong>
+                                                <small class="text-secondary d-block">@{{ u.username }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="text-secondary d-block"><i class="far fa-envelope me-1 text-xs"></i>{{ u.email }}</span>
+                                        {% if u.profile.phone_number %}
+                                            <span class="text-secondary d-block"><i class="far fa-phone me-1 text-xs"></i>{{ u.profile.phone_number }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary-glow text-primary uppercase fs-8 px-2 py-1 font-weight-600">{{ u.profile.role }}</span>
+                                    </td>
+                                    <td class="text-secondary">{{ u.date_joined|date:"M d, Y" }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-secondary">
+                                        <p class="mb-0">No registered users in the database.</p>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Library integration -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const ctx = document.getElementById('revenueChart');
+        if (!ctx) return;
+
+        // Fetch monthly revenue stats dynamically from the backend API
+        fetch("{% url 'admin_revenue_api' %}")
+            .then(res => res.json())
+            .then(apiData => {
+                
+                // Set custom color codes based on primary HSL values
+                const primaryColor = 'hsl(224, 76%, 48%)';
+                const gridBorderColor = 'rgba(156, 163, 175, 0.15)';
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: apiData.labels,
+                        datasets: [{
+                            label: 'Paid Revenues ($)',
+                            data: apiData.data,
+                            borderColor: primaryColor,
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: primaryColor,
+                            pointBorderColor: '#fff',
+                            pointHoverRadius: 7,
+                            pointRadius: 5
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                grid: {
+                                    color: gridBorderColor
+                                },
+                                ticks: {
+                                    color: '#9ca3af',
+                                    callback: function(value) {
+                                        return '$' + value;
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#9ca3af'
+                                }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(err => {
+                console.error("Failed to load dashboard chart data: ", err);
+            });
+    });
+</script>
+{% endblock %}

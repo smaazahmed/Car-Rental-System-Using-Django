@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}Explore Fleet | Antigravity Rentals{% endblock %}
+{% block content %}
+<div class="container py-5 mt-4">
+    
+    <div class="text-center mb-5 animate-fade-in">
+        <h1 class="display-5 text-primary font-weight-800">Explore Our Elite Fleet</h1>
+        <p class="text-secondary max-w-xl mx-auto">Filter and find the perfect car for your business trip, weekend getaway, or daily commute.</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- 1. Left Sidebar Filters Form -->
+        <div class="col-lg-3 col-md-12">
+            <div class="glass-panel p-4 position-sticky" style="top: 100px;">
+                <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom border-color">
+                    <h5 class="text-primary mb-0 font-weight-700"><i class="fas fa-filter text-primary me-2"></i>Filter Options</h5>
+                    <a href="{% url 'car_list' %}" class="text-xs text-primary text-decoration-none font-weight-600">Clear All</a>
+                </div>
+                
+                <form id="filter-form" action="" method="GET" class="d-flex flex-column gap-4">
+                    <!-- Text Keyword Search input -->
+                    <div>
+                        <label class="form-label text-secondary font-weight-600 fs-7">Search Keyword</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0 border-color text-secondary"><i class="fas fa-search text-xs"></i></span>
+                            <input type="text" name="q" value="{{ selected_filters.q }}" class="form-control bg-white text-dark shadow-none border-start-0 border-color py-2 fs-7" placeholder="Brand, name, etc.">
+                        </div>
+                    </div>
+
+                    <!-- Brand Select dropdown -->
+                    <div>
+                        <label class="form-label text-secondary font-weight-600 fs-7">Car Brand</label>
+                        <select name="brand" class="form-select bg-white text-dark shadow-none py-2 fs-7">
+                            <option value="">All Brands</option>
+                            {% for brand in brands %}
+                                <option value="{{ brand }}" {% if selected_filters.brand == brand %}selected{% endif %}>{{ brand }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Transmission Type dropdown -->
+                    <div>
+                        <label class="form-label text-secondary font-weight-600 fs-7">Transmission</label>
+                        <select name="transmission" class="form-select bg-white text-dark shadow-none py-2 fs-7">
+                            <option value="">Any Transmission</option>
+                            <option value="Automatic" {% if selected_filters.transmission == 'Automatic' %}selected{% endif %}>Automatic</option>
+                            <option value="Manual" {% if selected_filters.transmission == 'Manual' %}selected{% endif %}>Manual</option>
+                        </select>
+                    </div>
+
+                    <!-- Fuel Type dropdown -->
+                    <div>
+                        <label class="form-label text-secondary font-weight-600 fs-7">Fuel Type</label>
+                        <select name="fuel" class="form-select bg-white text-dark shadow-none py-2 fs-7">
+                            <option value="">Any Fuel</option>
+                            <option value="Petrol" {% if selected_filters.fuel == 'Petrol' %}selected{% endif %}>Petrol</option>
+                            <option value="Diesel" {% if selected_filters.fuel == 'Diesel' %}selected{% endif %}>Diesel</option>
+                            <option value="Electric" {% if selected_filters.fuel == 'Electric' %}selected{% endif %}>Electric</option>
+                            <option value="Hybrid" {% if selected_filters.fuel == 'Hybrid' %}selected{% endif %}>Hybrid</option>
+                        </select>
+                    </div>
+
+                    <!-- Seating capacity input -->
+                    <div>
+                        <label class="form-label text-secondary font-weight-600 fs-7">Seating Capacity</label>
+                        <select name="seats" class="form-select bg-white text-dark shadow-none py-2 fs-7">
+                            <option value="">Any Capacity</option>
+                            <option value="2" {% if selected_filters.seats == '2' %}selected{% endif %}>2 Seater</option>
+                            <option value="4" {% if selected_filters.seats == '4' %}selected{% endif %}>4 Seater</option>
+                            <option value="5" {% if selected_filters.seats == '5' %}selected{% endif %}>5 Seater</option>
+                            <option value="7" {% if selected_filters.seats == '7' %}selected{% endif %}>7 Seater</option>
+                        </select>
+                    </div>
+
+                    <!-- Price Cap Range input -->
+                    <div>
+                        <label class="form-label text-secondary font-weight-600 fs-7 d-flex justify-content-between">
+                            <span>Max Budget</span>
+                            <span class="text-primary font-weight-700" id="price-slider-preview">${{ selected_filters.max_price|default:"500" }}/day</span>
+                        </label>
+                        <input type="range" name="max_price" class="form-range shadow-none border-0 p-0" min="50" max="1000" step="25" value="{{ selected_filters.max_price|default:'500' }}" oninput="document.getElementById('price-slider-preview').innerText = '$' + this.value + '/day'">
+                    </div>
+
+                    <!-- Availability toggle -->
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input shadow-none cursor-pointer" type="checkbox" name="is_available" value="true" id="availableSwitch" {% if selected_filters.is_available == 'true' %}checked{% endif %}>
+                        <label class="form-check-label text-secondary font-weight-600 fs-7 cursor-pointer" for="availableSwitch">Available Only</label>
+                    </div>
+
+                    <!-- Hidden sort input, synced with sort select drop down -->
+                    <input type="hidden" name="sort_by" id="sort-by-hidden" value="{{ selected_filters.sort_by }}">
+                </form>
+            </div>
+        </div>
+
+        <!-- 2. Main Car Grid Panel -->
+        <div class="col-lg-9 col-md-12">
+            <!-- Grid Top Bar: Sorting select & Counter -->
+            <div class="glass-panel p-3 mb-4 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <span class="text-secondary font-weight-600 fs-7" id="car-counter-preview">Showing {{ cars.count }} vehicles</span>
+                
+                <div class="d-flex align-items-center gap-2">
+                    <span class="text-secondary text-xs uppercase font-weight-600">Sort By</span>
+                    <select id="sort-by-select" class="form-select bg-white text-dark shadow-none py-1 fs-7" style="width: 170px;">
+                        <option value="latest" {% if selected_filters.sort_by == 'latest' %}selected{% endif %}>Latest Added</option>
+                        <option value="price_low" {% if selected_filters.sort_by == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                        <option value="price_high" {% if selected_filters.sort_by == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                        <option value="rating" {% if selected_filters.sort_by == 'rating' %}selected{% endif %}>Highest Rated</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- AJAX Live Car Cards Container -->
+            <div class="row g-4" id="car-list-container">
+                {% include 'cars/car_list_partial.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

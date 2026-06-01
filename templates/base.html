@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Premium Rent A Car - DriveLux Rentals{% endblock %}</title>
+    
+    <!-- Meta Tags for SEO -->
+    <meta name="description" content="Rent a car online today. Experience luxury, speed, and seamless booking with DriveLux car rentals. Best prices guaranteed.">
+    <meta name="author" content="DriveLux Rentals">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Premium Stylesheet -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Dynamic Toast Alerts Container -->
+    <div id="toast-container" class="position-fixed bottom-0 end-0 p-4" style="z-index: 1050; display: flex; flex-direction: column; gap: 10px;"></div>
+
+    <!-- Premium Header & Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-premium py-3 sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{% url 'home' %}" id="main-logo-link">
+                <i class="fas fa-car-side text-primary fs-3"></i>
+                <span class="brand-font fs-4 text-primary tracking-tight">DRIVELUX</span>
+            </a>
+            
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="fas fa-bars fs-3 text-primary"></i>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-1 gap-lg-3">
+                    <li class="nav-item">
+                        <a class="nav-link font-weight-600 px-3 py-2 text-primary" href="{% url 'home' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link font-weight-600 px-3 py-2 text-secondary" href="{% url 'car_list' %}">Explore Cars</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link font-weight-600 px-3 py-2 text-secondary" href="{% url 'about' %}">About Us</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link font-weight-600 px-3 py-2 text-secondary" href="{% url 'contact' %}">Contact</a>
+                    </li>
+                </ul>
+                
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Light/Dark Mode Switcher -->
+                    <button id="theme-toggle" class="theme-switch-btn" title="Toggle Theme" aria-label="Theme Toggler">
+                        <i id="theme-toggle-icon" class="fas fa-moon"></i>
+                    </button>
+
+                    {% if request.user.is_authenticated %}
+                        <div class="dropdown">
+                            <button class="btn btn-premium d-flex align-items-center gap-2 px-3 py-2" type="button" id="userMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle fs-5"></i>
+                                <span>{{ request.user.username }}</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2 rounded-3 mt-2" aria-labelledby="userMenuDropdown" style="background-color: var(--bg-secondary);">
+                                <li>
+                                    <a class="dropdown-item py-2 px-3 rounded-2 text-primary font-weight-500" href="{% url 'dashboard_redirect' %}">
+                                        <i class="fas fa-columns me-2"></i> Dashboard
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-2 px-3 rounded-2 text-secondary" href="{% url 'profile' %}">
+                                        <i class="fas fa-user-cog me-2"></i> Edit Profile
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider border-color"></li>
+                                <li>
+                                    <a class="dropdown-item py-2 px-3 rounded-2 text-danger font-weight-600" href="{% url 'logout' %}">
+                                        <i class="fas fa-sign-out-alt me-2"></i> Log Out
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn-premium-outline text-decoration-none">Log In</a>
+                        <a href="{% url 'register' %}" class="btn-premium text-decoration-none">Sign Up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Block -->
+    <main style="min-height: 75vh;">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Professional Footer -->
+    <footer class="py-5 mt-5" style="background-color: var(--bg-secondary); border-top: 1px solid var(--border-color); color: var(--text-secondary);">
+        <div class="container">
+            <div class="row g-4 justify-content-between">
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center gap-2 mb-3 text-primary">
+                        <i class="fas fa-car-side fs-4"></i>
+                        <span class="brand-font fs-4 tracking-tight">DRIVELUX RENTALS</span>
+                    </div>
+                    <p class="mb-4">
+                        Experience ultimate mobility. Premium fleet rentals, keyless smart checkouts, and 24/7 client care across major airports and city outlets nationwide.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-secondary fs-5" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-secondary fs-5" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-secondary fs-5" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-secondary fs-5" aria-label="Linkedin"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-6">
+                    <h5 class="text-primary mb-3">Quick Links</h5>
+                    <ul class="list-unstyled d-flex flex-column gap-2">
+                        <li><a href="{% url 'car_list' %}" class="text-decoration-none text-secondary">Browse Fleet</a></li>
+                        <li><a href="{% url 'about' %}" class="text-decoration-none text-secondary">Our Story</a></li>
+                        <li><a href="{% url 'contact' %}" class="text-decoration-none text-secondary">Contact Support</a></li>
+                        <li><a href="#" class="text-decoration-none text-secondary">Terms of Service</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-4 col-md-12">
+                    <h5 class="text-primary mb-3">Newsletter</h5>
+                    <p>Subscribe to our exclusive rental offers, seasonal promotions, and supercar arrivals.</p>
+                    <form class="d-flex gap-2 mt-3" onsubmit="event.preventDefault(); window.showToast('Subscribed to Newsletter!', 'success');">
+                        <input type="email" class="form-control py-2 shadow-none border-color" placeholder="Your Email Address" required>
+                        <button type="submit" class="btn btn-premium px-3 py-2"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+            
+            <hr class="my-4 border-color">
+            
+            <div class="row align-items-center justify-content-between g-2">
+                <div class="col-md-6 text-center text-md-start">
+                    <p class="mb-0 fs-7">&copy; 2026 DriveLux Car Rental Systems LLC. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <p class="mb-0 fs-7">Designed for excellence and absolute freedom.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 Bundle JS with Popper CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Main Premium Javascript -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    <!-- Trigger Standard Django Messages Framework into premium toasts -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            {% if messages %}
+                {% for message in messages %}
+                    window.showToast("{{ message }}", "{% if message.tags == 'error' %}danger{% elif message.tags == 'warning' %}warning{% elif message.tags == 'info' %}info{% else %}success{% endif %}");
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

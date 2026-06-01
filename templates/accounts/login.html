@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Log In | Antigravity Rentals{% endblock %}
+{% block content %}
+<div class="container py-5 mt-5 d-flex justify-content-center">
+    <div class="glass-panel p-4 p-md-5 w-100" style="max-width: 480px;">
+        <div class="text-center mb-4">
+            <h2 class="text-primary fs-1">Welcome Back</h2>
+            <p class="text-secondary">Log in to manage your active rentals and search reservations</p>
+        </div>
+        
+        <form method="POST" class="d-flex flex-column gap-3">
+            {% csrf_token %}
+            
+            <div>
+                <label class="form-label text-secondary font-weight-600">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 border-color text-secondary"><i class="fas fa-user"></i></span>
+                    <input type="text" name="username" class="form-control bg-white text-dark shadow-none border-start-0 border-color" placeholder="Enter username" required>
+                </div>
+            </div>
+
+            <div>
+                <label class="form-label text-secondary font-weight-600">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 border-color text-secondary"><i class="fas fa-lock"></i></span>
+                    <input type="password" name="password" class="form-control bg-white text-dark shadow-none border-start-0 border-color" placeholder="Enter password" required>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center justify-content-between mt-1 fs-7">
+                <div class="form-check">
+                    <input class="form-check-input shadow-none" type="checkbox" id="rememberMe">
+                    <label class="form-check-label text-secondary font-weight-500" for="rememberMe">Remember me</label>
+                </div>
+                <a href="#" onclick="event.preventDefault(); window.showToast('Demo Alert: Password reset email link sent (Simulated)', 'info');" class="text-primary text-decoration-none font-weight-600">Forgot Password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-premium w-100 py-3 mt-3 font-weight-600 fs-6">
+                <i class="fas fa-sign-in-alt me-2"></i> Log In
+            </button>
+        </form>
+
+        <hr class="my-4 border-color">
+
+        <div class="text-center text-secondary fs-7">
+            Don't have an account yet? <a href="{% url 'register' %}" class="text-primary text-decoration-none font-weight-600">Sign Up free</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
