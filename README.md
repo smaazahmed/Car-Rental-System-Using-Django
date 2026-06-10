@@ -73,6 +73,18 @@ http://127.0.0.1:8000/
 - Customer dashboard: `http://127.0.0.1:8000/accounts/my-dashboard/`
 - Admin dashboard: `http://127.0.0.1:8000/admin-dashboard/`
 
+## Demo Credentials
+
+If you run `python seed_data.py`, the following demo accounts are created:
+
+- Admin: `admin` / `admin123`
+- Customer: `customer` / `customer123`
+
+Demo account emails:
+
+- Admin: `admin@driveluxrentals.com`
+- Customer: `customer@gmail.com`
+
 ## Project Structure
 
 ### Root files
@@ -229,4 +241,3 @@ python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
 ```
-

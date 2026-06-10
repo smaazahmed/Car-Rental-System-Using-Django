@@ -9,6 +9,13 @@ venv/
 ENV/
 env/*
 venv/*
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
 
 # Django stuff
 *.log
@@ -16,7 +23,19 @@ local_settings.py
 db.sqlite3
 media/
 staticfiles/
+*.sqlite3
+*.sqlite
+
+# Environment files
+.env
+.env.*
 
 # OS files
 .DS_Store
 Thumbs.db
+
+# IDE / editor files
+.vscode/
+.idea/
+*.swp
+*.swo
