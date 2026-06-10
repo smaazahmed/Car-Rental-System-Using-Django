@@ -7,6 +7,7 @@ from apps.cars.models import Car
 from .models import Booking, Payment
 import datetime
 import uuid
+from decimal import Decimal
 
 def check_availability(car, pickup_date, return_date):
     """
@@ -69,8 +70,8 @@ def init_booking(request, car_id):
         'return_date': return_date,
         'days': days,
         'total_price': total_price,
-        'service_fee': round(float(total_price) * 0.05, 2), # 5% service fee
-        'grand_total': round(float(total_price) * 1.05, 2),
+        'service_fee': (total_price * Decimal('0.05')).quantize(Decimal('0.01')), # 5% service fee
+        'grand_total': (total_price * Decimal('1.05')).quantize(Decimal('0.01')),
     })
 
 @login_required
@@ -79,6 +80,10 @@ def confirm_booking(request, car_id):
     if request.method == 'POST':
         pickup_date_str = request.POST.get('pickup_date')
         return_date_str = request.POST.get('return_date')
+        
+        if not pickup_date_str or not return_date_str:
+            messages.error(request, "Please choose both pickup and return dates before confirming your booking.")
+            return redirect('car_detail', car_id=car.id)
         
         try:
             pickup_date = datetime.datetime.strptime(pickup_date_str, "%Y-%m-%d").date()
@@ -96,7 +101,7 @@ def confirm_booking(request, car_id):
             delta = return_date - pickup_date
             days = max(delta.days, 1)
             base_price = car.rent_price_per_day * days
-            grand_total = base_price * 1.05 # Include 5% fee
+            grand_total = (base_price * Decimal('1.05')).quantize(Decimal('0.01')) # Include 5% fee
 
             # Create Booking
             booking = Booking.objects.create(
@@ -134,6 +139,9 @@ def confirm_booking(request, car_id):
             messages.success(request, f"Congratulations! Your booking for {car.name} is confirmed and payment processed successfully.")
             return redirect('booking_receipt', booking_id=booking.id)
 
+        except ValueError:
+            messages.error(request, "Invalid date format. Please select valid pickup and return dates.")
+            return redirect('car_detail', car_id=car.id)
         except Exception as e:
             messages.error(request, f"Checkout failed: {str(e)}")
             return redirect('car_detail', car_id=car.id)
@@ -150,7 +158,7 @@ def booking_receipt(request, booking_id):
     
     # Calculate receipt variables
     base_price = booking.car.rent_price_per_day * booking.duration_days
-    service_fee = float(base_price) * 0.05
+    service_fee = (base_price * Decimal('0.05')).quantize(Decimal('0.01'))
 
     return render(request, 'bookings/receipt.html', {
         'booking': booking,

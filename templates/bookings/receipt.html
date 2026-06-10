@@ -56,22 +56,24 @@
 
         <!-- Vehicle Details Panel -->
         <h5 class="text-primary font-weight-800 mb-3">Vehicle Details</h5>
-        <div class="row g-3 p-3 bg-primary bg-opacity-5 rounded-3 border border-color fs-7 mb-5">
-            <div class="col-md-4">
-                <span class="text-secondary d-block font-weight-500 mb-1">VEHICLE BRAND & MODEL</span>
-                <strong class="text-primary fs-6">{{ booking.car.brand }} {{ booking.car.name }}</strong>
-            </div>
-            <div class="col-md-3">
-                <span class="text-secondary d-block font-weight-500 mb-1">REGISTRATION NUMBER</span>
-                <strong class="text-primary">{{ booking.car.registration_number }}</strong>
-            </div>
-            <div class="col-md-3">
-                <span class="text-secondary d-block font-weight-500 mb-1">PICKUP LOCATION</span>
-                <strong class="text-primary">{{ booking.car.location }}</strong>
-            </div>
-            <div class="col-md-2">
-                <span class="text-secondary d-block font-weight-500 mb-1">CAPACITY</span>
-                <strong class="text-primary">{{ booking.car.seating_capacity }} Seater</strong>
+        <div class="p-4 rounded-4 border fs-7 mb-5" style="background: rgba(15, 23, 42, 0.75); border-color: rgba(148, 163, 184, 0.18) !important;">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <span class="text-secondary d-block font-weight-500 mb-2 text-uppercase" style="letter-spacing: .04em;">Vehicle Brand & Model</span>
+                    <strong class="text-light fs-6 d-block">{{ booking.car.brand }} {{ booking.car.name }}</strong>
+                </div>
+                <div class="col-md-3">
+                    <span class="text-secondary d-block font-weight-500 mb-2 text-uppercase" style="letter-spacing: .04em;">Registration Number</span>
+                    <strong class="text-light d-block">{{ booking.car.registration_number }}</strong>
+                </div>
+                <div class="col-md-3">
+                    <span class="text-secondary d-block font-weight-500 mb-2 text-uppercase" style="letter-spacing: .04em;">Pickup Location</span>
+                    <strong class="text-light d-block">{{ booking.car.location }}</strong>
+                </div>
+                <div class="col-md-2">
+                    <span class="text-secondary d-block font-weight-500 mb-2 text-uppercase" style="letter-spacing: .04em;">Capacity</span>
+                    <strong class="text-light d-block">{{ booking.car.seating_capacity }} Seater</strong>
+                </div>
             </div>
         </div>
 

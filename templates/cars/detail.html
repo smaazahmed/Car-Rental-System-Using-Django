@@ -123,7 +123,7 @@
                         </div>
 
                         <!-- Dynamic Price Preview (Updated via JS in main.js) -->
-                        <div class="bg-primary bg-opacity-5 p-3 rounded-3 border border-color" style="display: none;" id="pricing-preview-box">
+                        <div class="p-3 rounded-3 border" style="display: none; background: rgba(15, 23, 42, 0.92); border-color: rgba(148, 163, 184, 0.22) !important; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);" id="pricing-preview-box">
                             <h6 class="text-primary font-weight-700 mb-3 fs-7">Estimated Cost breakdown</h6>
                             <div class="d-flex justify-content-between fs-7 text-secondary mb-2">
                                 <span>Rental Duration</span>
@@ -293,11 +293,41 @@
         const pInput = document.getElementById("pickup_date");
         const rInput = document.getElementById("return_date");
         const box = document.getElementById("pricing-preview-box");
+        const daysEl = document.getElementById("checkout-days");
+        const basePriceEl = document.getElementById("checkout-base-price");
+        const serviceFeeEl = document.getElementById("checkout-service-fee");
+        const totalEl = document.getElementById("checkout-grand-total");
+        const pricePerDay = parseFloat(document.getElementById("price-per-day-val").value || "0");
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
         
         function checkInputs() {
-            if (pInput.value && rInput.value) {
-                box.style.display = "block";
+            if (!pInput.value || !rInput.value) {
+                box.style.display = "none";
+                return;
             }
+
+            const pickupDate = new Date(pInput.value + "T00:00:00");
+            const returnDate = new Date(rInput.value + "T00:00:00");
+            if (isNaN(pickupDate.getTime()) || isNaN(returnDate.getTime()) || pickupDate < today || returnDate < pickupDate) {
+                box.style.display = "block";
+                daysEl.textContent = "Invalid";
+                basePriceEl.textContent = "$0.00";
+                serviceFeeEl.textContent = "$0.00";
+                totalEl.textContent = "$0.00";
+                return;
+            }
+
+            const diffDays = Math.max(Math.ceil((returnDate - pickupDate) / (1000 * 60 * 60 * 24)), 1);
+            const basePrice = pricePerDay * diffDays;
+            const serviceFee = basePrice * 0.05;
+            const total = basePrice + serviceFee;
+
+            daysEl.textContent = `${diffDays} Day${diffDays > 1 ? 's' : ''}`;
+            basePriceEl.textContent = `$${basePrice.toFixed(2)}`;
+            serviceFeeEl.textContent = `$${serviceFee.toFixed(2)}`;
+            totalEl.textContent = `$${total.toFixed(2)}`;
+                box.style.display = "block";
         }
         pInput.addEventListener("change", checkInputs);
         rInput.addEventListener("change", checkInputs);

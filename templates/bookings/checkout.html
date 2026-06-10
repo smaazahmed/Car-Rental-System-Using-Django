@@ -19,8 +19,19 @@
                     {% csrf_token %}
                     
                     <!-- Core details carried forward in post -->
-                    <input type="hidden" name="pickup_date" value="{{ pickup_date|date:'Y-m-d' }}">
-                    <input type="hidden" name="return_date" value="{{ return_date|date:'Y-m-d' }}">
+                    {% if pickup_date and return_date %}
+                        <input type="hidden" name="pickup_date" value="{{ pickup_date|date:'Y-m-d' }}">
+                        <input type="hidden" name="return_date" value="{{ return_date|date:'Y-m-d' }}">
+                    {% else %}
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary font-weight-600 fs-7">Pickup Date *</label>
+                            <input type="date" name="pickup_date" class="form-control bg-white text-dark shadow-none fs-7 border-color" required min="{% now 'Y-m-d' %}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary font-weight-600 fs-7">Return Date *</label>
+                            <input type="date" name="return_date" class="form-control bg-white text-dark shadow-none fs-7 border-color" required min="{% now 'Y-m-d' %}">
+                        </div>
+                    {% endif %}
 
                     <h5 class="text-primary mb-2 font-weight-700">1. Customer Identification</h5>
                     
@@ -55,7 +66,7 @@
 
                     <div class="col-md-6">
                         <label class="form-label text-secondary font-weight-600 fs-7">Expiration Date *</label>
-                        <input type="text" class="form-control bg-white text-dark shadow-none fs-7 border-color" placeholder="MM / YY" required maxlength="5" oninput="formatCardExpiry(this)">
+                        <input type="text" class="form-control bg-white text-dark shadow-none fs-7 border-color" placeholder="MM / YYYY" required maxlength="9" oninput="formatCardExpiry(this)">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label text-secondary font-weight-600 fs-7">Security Code (CVV) *</label>
@@ -81,52 +92,63 @@
                 <h4 class="text-primary mb-4 font-weight-700"><i class="fas fa-calendar-alt text-primary me-2"></i>Reservation Summary</h4>
                 
                 <!-- Vehicle Card -->
-                <div class="premium-card p-2 d-flex align-items-center gap-3 mb-4">
-                    <div style="width: 100px; height: 60px; border-radius: 8px; overflow: hidden; background-color: var(--border-color);">
+                <div class="p-3 d-flex align-items-center gap-3 mb-4 rounded-4 border" style="background: rgba(15, 23, 42, 0.85); border-color: rgba(148, 163, 184, 0.18) !important;">
+                    <div style="width: 110px; height: 72px; border-radius: 12px; overflow: hidden; background-color: rgba(255,255,255,0.04); flex-shrink: 0;">
                         {% if car.images.exists %}
                             <img src="{{ car.images.first.image.url }}" alt="{{ car.name }}" style="width:100%; height:100%; object-fit:cover;">
                         {% else %}
                             <img src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?w=200" alt="{{ car.name }}" style="width:100%; height:100%; object-fit:cover;">
                         {% endif %}
                     </div>
-                    <div>
-                        <h6 class="mb-1 text-primary font-weight-700">{{ car.brand }} {{ car.name }}</h6>
-                        <span class="text-secondary fs-8"><i class="fas fa-map-marker-alt"></i> Pickup location: {{ car.location }}</span>
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-start justify-content-between gap-3">
+                            <div>
+                                <h6 class="mb-1 text-primary font-weight-700">{{ car.brand }} {{ car.name }}</h6>
+                                <span class="text-secondary fs-8 d-block">
+                                    <i class="fas fa-map-marker-alt me-1"></i>Pickup location: {{ car.location }}
+                                </span>
+                            </div>
+                            {% if car.is_available %}
+                                <span class="badge rounded-pill px-3 py-2" style="background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.18);">Available</span>
+                            {% else %}
+                                <span class="badge rounded-pill px-3 py-2" style="background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.18);">Unavailable</span>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
 
                 <!-- Dates Panel -->
-                <div class="row g-2 mb-4 p-3 bg-primary bg-opacity-5 rounded-3 border border-color fs-7">
+                <div class="row g-2 mb-4 p-3 rounded-4 border fs-7" style="background: rgba(15, 23, 42, 0.72); border-color: rgba(148, 163, 184, 0.18) !important;">
                     <div class="col-6">
-                        <span class="text-secondary d-block font-weight-500 mb-1">PICKUP DATE</span>
+                        <span class="text-secondary d-block font-weight-500 mb-1 text-uppercase" style="letter-spacing: .04em;">Pickup Date</span>
                         <strong class="text-primary">{{ pickup_date }}</strong>
                     </div>
                     <div class="col-6">
-                        <span class="text-secondary d-block font-weight-500 mb-1">RETURN DATE</span>
+                        <span class="text-secondary d-block font-weight-500 mb-1 text-uppercase" style="letter-spacing: .04em;">Return Date</span>
                         <strong class="text-primary">{{ return_date }}</strong>
                     </div>
                 </div>
 
                 <!-- Cost Breakdown list -->
-                <h6 class="text-primary font-weight-700 mb-3 fs-7 uppercase">Billing Invoice</h6>
+                <h6 class="text-primary font-weight-700 mb-3 fs-7">Billing Invoice</h6>
                 <div class="d-flex justify-content-between fs-7 text-secondary mb-2">
                     <span>Base Charge ({{ days }} Day{{ days|pluralize }})</span>
-                    <span class="font-weight-600">${{ total_price }}</span>
+                    <span class="font-weight-600 text-light">${{ total_price }}</span>
                 </div>
                 <div class="d-flex justify-content-between fs-7 text-secondary mb-2">
                     <span>Service Surcharges (5%)</span>
-                    <span class="font-weight-600">${{ service_fee }}</span>
+                    <span class="font-weight-600 text-light">${{ service_fee }}</span>
                 </div>
                 <div class="d-flex justify-content-between fs-7 text-secondary mb-2">
                     <span>Collision Waiver Taxes</span>
-                    <span class="font-weight-600">$0.00</span>
+                    <span class="font-weight-600 text-light">$0.00</span>
                 </div>
                 
                 <hr class="my-3 border-color">
                 
-                <div class="d-flex justify-content-between fs-5 text-primary font-weight-800">
+                <div class="d-flex justify-content-between fs-5 font-weight-800 align-items-center">
                     <span>Total Bill</span>
-                    <span>${{ grand_total }}</span>
+                    <span class="text-primary">${{ grand_total }}</span>
                 </div>
             </div>
         </div>
@@ -137,7 +159,7 @@
     function formatCardExpiry(input) {
         let val = input.value.replace(/\D/g, '');
         if (val.length >= 2) {
-            input.value = val.slice(0, 2) + ' / ' + val.slice(2, 4);
+            input.value = val.slice(0, 2) + ' / ' + val.slice(2, 6);
         } else {
             input.value = val;
         }
